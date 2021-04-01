@@ -27,22 +27,23 @@ public class BoardPrinter {
             for(int j=0; j<board[i].length; j++){
                 StringBuilder builder = new StringBuilder();
                 StringBuilder pawnName = new StringBuilder();
-                builder.append("|");
+
                 Box box = board[i][j];
                 if(box!=null && box.getPawn()!=null){
-                    builder.append(pawnNameToShortNameMap.get(box.getPawn().getPawnName()));
                     if(PawnType.WHITE.equals(box.getPawn().getType())){
-                        pawnName.append("W");
+                        builder.append("\u001B[34m");
                     }
                     else if(PawnType.BLACK.equals(box.getPawn().getType())){
-                        pawnName.append("B");
+                        builder.append("\u001B[31m");
                     }
+                    builder.append("|").append(pawnNameToShortNameMap.get(box.getPawn().getPawnName())).append("");
 
                 }
-                if(pawnName.length()==0)
-                    builder.append("  |");
                 else
-                    builder.append(pawnName).append("|");
+                    builder.append("\u001B[30m| ");
+                if(j==7){
+                    builder.append("|");
+                }
                 System.out.print(builder);
             }
             System.out.println();

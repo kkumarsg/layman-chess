@@ -1,52 +1,86 @@
 package com.flipkart.service;
 
 import com.flipkart.exception.ChessGameException;
+import com.flipkart.helper.*;
 import com.flipkart.models.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ChessGameCreator {
 
+    private Game game;
 
-    public static void main(String[] args) throws ChessGameException {
-        new ChessGameCreator().createNewGame();
+    public static void main(String[] args) {
+        Game newGame = new ChessGameCreator().createNewGame();
+        BoardPrinter.printBoard(newGame.getBoard());
     }
 
-    private GameTracker gameTracker;
-
-    public Box[][] createNewGame() throws ChessGameException {
-         gameTracker = new GameTracker();
-         Box[][] board = new Box[8][8];
-         BoardInitializer.initializeBoard(board);
-
-         BoardPrinter.printBoard(board);
-         new ChessGameCreator().makeAMove(board[0][1], new Postition(2,2), board);
-         BoardPrinter.printBoard(board);
-         return board;
+    public Game createNewGame(){
+        game = new Game();
+        Box[][] board = new Box[8][8];
+        BoardInitializer.initializeBoard(board);
+        game.setBoard(board);
+        game.setTurn(PawnType.WHITE);
+        return game;
     }
 
 
+    public List<Postition> findPossiblePaths(Box start, Box[][] board) throws ChessGameException {
 
-    public List<Box> findPossiblePaths(Box start, Box[][] board){
-        return null;
+        List<Postition> possiblePositions = new ArrayList<>();
+
+        if (start == null || start.getPostition() == null || start.getPawn() == null) {
+            return possiblePositions;
+        }
+
+        int startX = start.getPostition().getX();
+        int startY = start.getPostition().getY();
+
+        if (PawnName.SOLDIER.equals(start.getPawn().getPawnName())) {
+            if (PawnType.WHITE.equals(start.getPawn().getType())) {
+                possiblePositions.addAll(PossiblePathWhiteSoldierHelper.possiblePathForWhiteSoldier(board, startX, startY));
+            } else {
+                possiblePositions.addAll(PossiblePathBlackSoldierHelper.possiblePathForBlackSoldier(board, startX, startY));
+            }
+        }
+
+        if (PawnName.KNIGHT.equals(start.getPawn().getPawnName())) {
+            possiblePositions.addAll(PossiblePathKnightHelper.possiblePathForKnight(board, startX, startY));
+        }
+
+        if (PawnName.BISHOP.equals(start.getPawn().getPawnName())) {
+            possiblePositions.addAll(PossiblePathBishopHelper.possiblePathForBishop(board, startX, startY));
+        }
+
+        if (PawnName.ELEPHANT.equals(start.getPawn().getPawnName())) {
+            possiblePositions.addAll(PossiblePathElephantHelper.possiblePathForElephant(board, startX, startY));
+        }
+
+        if (PawnName.QUEEN.equals(start.getPawn().getPawnName())) {
+            possiblePositions.addAll(PossiblePathElephantHelper.possiblePathForElephant(board, startX, startY));
+            possiblePositions.addAll(PossiblePathBishopHelper.possiblePathForBishop(board, startX, startY));
+        }
+
+        if (PawnName.KING.equals(start.getPawn().getPawnName())) {
+            possiblePositions.addAll(PossiblePathKingHelper.possiblePathForKing(board, startX, startY));
+        }
+
+        return possiblePositions;
     }
 
-    public void makeAMove(Box start, Postition end, Box[][] board) throws ChessGameException {
+    public void makeAMove(Postition start, Postition end, Box[][] board) throws ChessGameException {
 
-        if(end == null || checkIfPositionIsInsideTheBoard(end)){
+        if (end == null || PossiblePathHelper.validPosition(end.getX(), end.getY())) {
             throw new ChessGameException("Sorry, you cannot move out of the board ");
         }
         // checking if start is in the board.
-        if(start==null || checkIfPositionIsInsideTheBoard(start.getPostition())){
+        if (start == null || PossiblePathHelper.validPosition(start.getX(), start.getY())) {
             throw new ChessGameException("Sorry, you cannot enter the board now :D");
         }
-        board[end.getX()][end.getY()] = start;
-        board[start.getPostition().getX()][start.getPostition().getY()] = null;
+        board[end.getX()][end.getY()] = board[start.getX()][start.getY()];
+        board[start.getX()][start.getY()] = null;
 
-    }
-
-    private boolean checkIfPositionIsInsideTheBoard(Postition postition) {
-        return postition!=null && postition.getX() < 0 || postition.getX() > 7 || postition.getY() < 0 || postition.getY() > 7;
     }
 
 

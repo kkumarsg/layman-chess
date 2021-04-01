@@ -2,7 +2,7 @@ package com.flipkart.models;
 
 import java.util.Map;
 
-public class GameTracker {
+public class Game {
 
     Box[][] board;
     PawnType turn;
